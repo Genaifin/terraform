@@ -1,5 +1,5 @@
 # ============================================================================
-# TARGET-GROUP.TF - FULL INTEGRATED CONFIGURATION
+# TARGET-GROUP.TF - IP MODE (POD-DIRECT ROUTING)
 # ============================================================================
 
 # 1. KUBERNETES PROVIDER
@@ -18,42 +18,42 @@ provider "kubernetes" {
   }
 }
 
-# 2. LOCALS (Service Definitions)
+# 2. LOCALS 
 locals {
   target_group_services = {
-    "document-page-classification" = { node_port = 30003, k8s_service = "doc-page-classification-service", k8s_port = 8003, health_path = "/health", namespace = "dev" }
-    "document-classification"      = { node_port = 30006, k8s_service = "doc-classification-service", k8s_port = 8006, health_path = "/", namespace = "dev" }
-    "document-field-extraction"    = { node_port = 30004, k8s_service = "doc-field-extraction-service", k8s_port = 8004, health_path = "/api/field-extraction/health", namespace = "dev" }
-    "text-extraction"              = { node_port = 30015, k8s_service = "text-extraction-service", k8s_port = 8015, health_path = "/api/document-text-extraction/health", namespace = "dev" }
-    "validus"                      = { node_port = 30020, k8s_service = "validus-service", k8s_port = 8020, health_path = "/health", namespace = "dev" }
-    "rabbit-mq"                    = { node_port = 30044, k8s_service = "rabbitmq-service", k8s_port = 15672, health_path = "/api/health/checks/virtual-hosts", namespace = "rabbitmq-system" }
-    "rabbit-mq-m"                  = { node_port = 32525, k8s_service = "rabbitmq-service-m", k8s_port = 5672, health_path = "/", namespace = "rabbitmq-system" }
-
-    "fvrk-dev-tg"                  = { node_port = 30080, k8s_service = "frame-validus-service", k8s_port = 80, health_path = "/", namespace = "dev" }
-    "fvrk-dev-tg"                  = { node_port = 30080, k8s_service = "frame-validus-service", k8s_port = 80, health_path = "/", namespace = "dev" }
-    "frame"                        = { node_port = 30040, k8s_service = "frame-service", k8s_port = 8040, health_path = "/health", namespace = "dev" }   
-    "common-service"               = { node_port = 30033, k8s_service = "common-service-service", k8s_port = 8000, health_path = "/api/common/health", namespace = "dev" }
-    "keycloak"                     = { node_port = 30102, k8s_service = "keycloak-service", k8s_port = 8080, health_path = "/health/live", namespace = "dev" }
-    "konga-service"                = { node_port = 30108, k8s_service = "konga-service", k8s_port = 1337, health_path = "/status", namespace = "dev" }
-    "kong-gateway"                 = { node_port = 30107, k8s_service = "kong-service", k8s_port = 8000, health_path = "/api/common/health", namespace = "dev" }
-    "jenkins-tg"                   = { node_port = 30088, k8s_service = "jenkins-service", k8s_port = 8080, health_path = "/login", namespace = "dev" }
-    "argocd"                       = { node_port = 30100, k8s_service = "argocd-server-nodeport", k8s_port = 80, health_path = "/healthz", namespace = "argocd" } 
-    "airflow"                      = { node_port = 30061, k8s_service = "airflow-webserver-nodeport", k8s_port = 8080, health_path = "/", namespace = "airflow" }
-    "etl-dev"                      = { node_port = 30045, k8s_service = "etl-deployment-dev", k8s_port = 5000, health_path = "/", namespace = "dev" }
-    "grafana-k8s"                  = { node_port = 30001, k8s_service = "kube-prometheus-stack-grafana", k8s_port = 80, health_path = "/api/health", namespace = "monitoring" }
-    "schedulerapi-dev"             = { node_port = 30047, k8s_service = "schedulerapi-service-dev", k8s_port = 5000, health_path = "/", namespace = "dev" }
+    "document-page-classification" = { k8s_service = "doc-page-classification-service", k8s_port = 8003, health_path = "/health", namespace = "dev" }
+    "document-classification"      = { k8s_service = "doc-classification-service", k8s_port = 8006, health_path = "/", namespace = "dev" }
+    "document-field-extraction"    = { k8s_service = "doc-field-extraction-service", k8s_port = 8004, health_path = "/api/field-extraction/health", namespace = "dev" }
+    "text-extraction"              = { k8s_service = "text-extraction-service", k8s_port = 8015, health_path = "/api/document-text-extraction/health", namespace = "dev" }
+    "validus"                      = { k8s_service = "validus-service", k8s_port = 8020, health_path = "/health", namespace = "dev" }
+    "rabbit-mq"                    = { k8s_service = "rabbitmq-service", k8s_port = 15672, health_path = "/api/health/checks/virtual-hosts", namespace = "rabbitmq-system" }
+    "rabbit-mq-m"                  = { k8s_service = "rabbitmq-service-m", k8s_port = 5672, health_path = "/", namespace = "rabbitmq-system" }
+    "fvrk-dev-tg"                  = { k8s_service = "frame-validus-service", k8s_port = 80, health_path = "/", namespace = "dev" }
+    "frame"                        = { k8s_service = "frame-service", k8s_port = 8040, health_path = "/health", namespace = "dev" }   
+    "common-service"               = { k8s_service = "common-service-service", k8s_port = 8000, health_path = "/api/common/health", namespace = "dev" }
+    "keycloak"                     = { k8s_service = "keycloak-service", k8s_port = 8080, health_path = "/health/live", namespace = "dev" }
+    "konga-service"                = { k8s_service = "konga-service", k8s_port = 1337, health_path = "/status", namespace = "dev" }
+    "kong-gateway"                 = { k8s_service = "kong-service", k8s_port = 8000, health_path = "/api/common/health", namespace = "dev" }
+    "jenkins-tg"                   = { k8s_service = "jenkins-service", k8s_port = 8080, health_path = "/login", namespace = "dev" }
+    "argocd"                       = { k8s_service = "argocd-server-nodeport", k8s_port = 80, health_path = "/healthz", namespace = "argocd" } 
+    "airflow"                      = { k8s_service = "airflow-webserver-nodeport", k8s_port = 8080, health_path = "/", namespace = "airflow" }
+    "etl-dev"                      = { k8s_service = "etl-deployment-dev", k8s_port = 5000, health_path = "/", namespace = "dev" }
+    "grafana-k8s"                  = { k8s_service = "kube-prometheus-stack-grafana", k8s_port = 80, health_path = "/api/health", namespace = "monitoring" }
+    "schedulerapi-dev"             = { k8s_service = "schedulerapi-service-dev", k8s_port = 5000, health_path = "/", namespace = "dev" }
   }
 }
 
-# 3. AWS TARGET GROUPS
+# 3. AWS TARGET GROUPS (Using IP mode)
 resource "aws_lb_target_group" "main" {
   for_each = local.target_group_services
 
-  name        = "k8s-${each.key}"
-  port        = each.value.node_port
+
+  name_prefix = "ip-tg-" 
+  
+  port        = each.value.k8s_port 
   protocol    = "HTTP"
   vpc_id      = data.aws_eks_cluster.cluster.vpc_config[0].vpc_id
-  target_type = "instance"
+  target_type = "ip" 
 
   health_check {
     path                = each.value.health_path
@@ -67,10 +67,16 @@ resource "aws_lb_target_group" "main" {
 
   tags = {
     ManagedBy = "Terraform"
+    App       = each.key 
+  }
+
+ 
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
-# 4. KUBERNETES BINDINGS
+# 4. KUBERNETES BINDINGS (Using IP mode)
 resource "kubernetes_manifest" "tg_bindings" {
   for_each = local.target_group_services
 
@@ -78,7 +84,7 @@ resource "kubernetes_manifest" "tg_bindings" {
     apiVersion = "elbv2.k8s.aws/v1beta1"
     kind       = "TargetGroupBinding"
     metadata = {
-      name      = "${each.key}-binding"
+      name      = "${each.key}-ip-binding"
       namespace = each.value.namespace
     }
     spec = {
@@ -87,13 +93,12 @@ resource "kubernetes_manifest" "tg_bindings" {
         port = each.value.k8s_port
       }
       targetGroupARN = aws_lb_target_group.main[each.key].arn
-      targetType     = "instance"
+      targetType     = "ip" # <--- CHANGED TO IP MODE
     }
   }
 }
 
-# 5. LISTENER RULES
-
+# 5. LISTENER RULES (Unchanged)
 resource "aws_lb_listener_rule" "rule_1" {
   listener_arn = aws_lb_listener.https.arn
   priority     = 1

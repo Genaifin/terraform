@@ -38,7 +38,12 @@ resource "helm_release" "aws_load_balancer_controller" {
     value = "aws-load-balancer-controller"
   }
 
-  # --- CRITICAL FIXES FOR CRASHLOOP ---
+  # --- CRITICAL FIX: Link the Kubernetes Service Account to the AWS IAM Role ---
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = aws_iam_role.aws_lb_controller_irsa.arn
+  }
+
   set {
     name  = "region"
     value = "ap-south-1" 
