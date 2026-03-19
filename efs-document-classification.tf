@@ -113,3 +113,66 @@ output "aithon_efs_id" {
   value = aws_efs_file_system.aithon_efs.id
   description = "The File System ID for the Aithon General Data EFS"
 }
+
+
+# ============================================================================
+# NEW EFS: Airflow Data (for DAGs and Logs)
+# ============================================================================
+
+# --- 8. Create the NEW EFS File System (airflow-data) ---
+resource "aws_efs_file_system" "airflow_efs" {
+  creation_token = "airflow-data-fs"
+  encrypted      = true
+
+  tags = {
+    Name = "Airflow-Data" # Easy to identify in AWS Console
+  }
+}
+
+# --- 9. Create Security Group for Airflow EFS ---
+resource "aws_security_group" "airflow_efs_sg" {
+  name        = "airflow-efs-sg"
+  description = "Allow NFS traffic for Airflow EFS"
+  vpc_id      = aws_vpc.main.id 
+
+  # Allow NFS (2049) from within the VPC
+  ingress {
+    description = "NFS from VPC"
+    from_port   = 2049
+    to_port     = 2049
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# --- 10. Create Mount Targets for Airflow EFS (One per AZ) ---
+resource "aws_efs_mount_target" "airflow_efs_mt" {
+  # Loop through unique Availability Zones (Consistent with your previous logic)
+  for_each = { 
+    for subnet in aws_subnet.public : subnet.availability_zone => subnet.id... 
+  }
+
+  file_system_id  = aws_efs_file_system.airflow_efs.id # <-- Links to the Airflow EFS
+  
+  # Select the first subnet found for each unique AZ
+  subnet_id       = each.value[0]
+  
+  security_groups = [aws_security_group.airflow_efs_sg.id]
+  
+  depends_on = [
+    aws_efs_file_system.airflow_efs,
+  ]
+}
+
+# --- 11. Output the Airflow EFS ID ---
+output "airflow_efs_id" {
+  value = aws_efs_file_system.airflow_efs.id
+  description = "The File System ID for the Airflow EFS (Use this in your PV definition)"
+}

@@ -43,33 +43,70 @@ resource "aws_security_group" "bastion_sg" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "SSH from anywhere"
-    from_port   = 22
-    to_port     = 22
+    description = "OLlama from everywhere"
+    from_port   = 11434
+    to_port     = 11434
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # WARNING: In production, replace this with your specific IP
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Added PostgreSQL rule
+  ingress {
+    from_port   = 17912
+    to_port     = 17912
+    protocol    = "tcp"
+    cidr_blocks = ["10.10.0.0/16"]
+  }
+
   ingress {
     description = "PostgreSQL from anywhere"
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["10.10.0.0/16"]
   }
-  
-  # WARNING: This rule is redundant if 22 and 5432 are already defined.
-  # It essentially allows all traffic (ports 0-65535, all protocols) from anywhere.
-  # I'll leave it since it was in your input, but best practice is to remove it.
+
   ingress {
-    description = "All traffic from anywhere (DANGEROUS)"
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["10.11.0.0/16", "192.168.0.0/16", "0.0.0.0/0"]
+  }
+
+  ingress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["10.11.0.0/16", "192.168.0.0/16"]
   }
 
+  ingress {
+    from_port   = 6379
+    to_port     = 6379
+    protocol    = "tcp"
+    cidr_blocks = ["10.11.0.0/16"]
+  }
+
+  ingress {
+    from_port   = 8123
+    to_port     = 8123
+    protocol    = "tcp"
+    cidr_blocks = ["10.11.0.0/16"]
+  }
+
+  ingress {
+    from_port   = 9000
+    to_port     = 9000
+    protocol    = "tcp"
+    cidr_blocks = ["10.11.0.0/16"]
+  }
+
+  ingress {
+    description = "SSH from anywhere"
+    from_port   = 17912
+    to_port     = 17912
+    protocol    = "tcp"
+    cidr_blocks = ["10.11.0.0/16"]
+  }
 
   egress {
     from_port   = 0
@@ -87,7 +124,7 @@ resource "aws_security_group" "bastion_sg" {
 resource "aws_instance" "bastion" {
   provider      = aws.mumbai
   ami           = "ami-0ade68f094cc81635"
-  instance_type = "t2.medium" # Updated from t2.micro
+  instance_type = "t3a.large" # Updated from t2.micro
 
   # Place in the first Public Subnet
   subnet_id                   = aws_subnet.public[0].id
@@ -97,6 +134,7 @@ resource "aws_instance" "bastion" {
   
   tags = {
     Name = "Fvrk-dev-bastion-host"
+    Env  = "Dev"
   }
 }
 

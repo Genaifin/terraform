@@ -1,7 +1,7 @@
 # --- 10. The Airflow-dev Instance ---
 resource "aws_instance" "airflow" {
   provider      = aws.mumbai
-  ami           = data.aws_ami.ubuntu.id # Using the dynamic AMI from step 1
+  ami           = "ami-07216ac99dc46a187" # Using the dynamic AMI from step 1
   instance_type = "t3.large" 
 
   # Place in the public subnet
@@ -19,25 +19,14 @@ resource "aws_instance" "airflow" {
 }
 
 # --- 11. Create Elastic IP (EIP) for Airflow ---
-resource "aws_eip" "airflow_ip" {
-  provider = aws.mumbai
-  domain   = "vpc"
 
-  tags = {
-    Name = "airflow-dev-ip"
-  }
-}
 
 # --- 12. Attach Elastic IP to the Airflow Instance ---
-resource "aws_eip_association" "airflow_eip_assoc" {
-  provider      = aws.mumbai
-  instance_id   = aws_instance.airflow.id
-  allocation_id = aws_eip.airflow_ip.id
-}
+
 
 # --- 13. Ensure Airflow Instance is Running ---
 resource "aws_ec2_instance_state" "airflow_state" {
   provider    = aws.mumbai
   instance_id = aws_instance.airflow.id
-  state       = "running"
+  state       = "stopped"
 }

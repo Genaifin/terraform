@@ -9,7 +9,12 @@ locals {
     "frame",
     "gateway",
     "frontend",
-    "common-service"
+    "common-service",
+    "airflow",
+    "validus-athena",
+    "schedulerapi",
+    "harvestingapi",
+    "etl"
   ]
 }
 
@@ -44,7 +49,7 @@ resource "aws_ecr_lifecycle_policy" "cleanup_policy" {
       selection = {
         tagStatus   = "any"
         countType   = "imageCountMoreThan"
-        countNumber = 10
+        countNumber = 50
       }
       action = {
         type = "expire"

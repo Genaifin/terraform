@@ -62,6 +62,10 @@ resource "aws_route_table" "public" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
+  route {
+    cidr_block                = "10.10.0.0/16"
+    vpc_peering_connection_id = "pcx-01ed878be2b7d044c"
+  }
 
   tags = {
     Name = "FVRK-DEV-public-route-table"
