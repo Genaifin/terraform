@@ -14,7 +14,8 @@ locals {
     "validus-athena",
     "schedulerapi",
     "harvestingapi",
-    "etl"
+    "etl",
+    "frame-athena"
   ]
 }
 

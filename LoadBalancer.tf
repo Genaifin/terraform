@@ -49,8 +49,8 @@ resource "aws_lb" "main" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = slice(aws_subnet.public[*].id, 0, 3) 
-  idle_timeout       = 300 
+  subnets            = slice(aws_subnet.public[*].id, 0, 3)
+  idle_timeout       = 300
 
   tags = {
     Name = "Fvrk-dev-alb"
@@ -78,10 +78,10 @@ resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.main.arn
   port              = "443"
   protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+
   # YOUR CERTIFICATE
-  certificate_arn   = "arn:aws:acm:ap-south-1:010438478476:certificate/027daaa8-4c47-41d3-ad8c-b7828d332752"
+  certificate_arn = "arn:aws:acm:ap-south-1:010438478476:certificate/027daaa8-4c47-41d3-ad8c-b7828d332752"
 
   # Default Action: Forward to Frontend (Target Group defined in other file)
   default_action {
@@ -143,8 +143,8 @@ resource "aws_lb" "main_uat" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg_uat.id]
-  subnets            = slice(aws_subnet.public[*].id, 0, 3) 
-  idle_timeout       = 300 
+  subnets            = slice(aws_subnet.public[*].id, 0, 3)
+  idle_timeout       = 300
 
   tags = {
     Name = "fvrk-uat-alb"
@@ -173,15 +173,114 @@ resource "aws_lb_listener" "https_uat" {
   load_balancer_arn = aws_lb.main_uat.arn
   port              = "443"
   protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+
   # Same certificate used for UAT
-  certificate_arn   = "arn:aws:acm:ap-south-1:010438478476:certificate/027daaa8-4c47-41d3-ad8c-b7828d332752"
+  certificate_arn = "arn:aws:acm:ap-south-1:010438478476:certificate/027daaa8-4c47-41d3-ad8c-b7828d332752"
 
   # Default Action: Updated to point to UAT Target Group
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.main_uat["fvrk-uat-tg"].arn
+  }
+}
+
+###############
+
+# DEMO ALB
+
+####################
+
+# ============================================================================
+# LOADBALANCER.TF - DEMO Infrastructure
+# ============================================================================
+
+# 1. SECURITY GROUP (DEMO)
+resource "aws_security_group" "alb_sg_demo" {
+  name        = "Fvrk-demo-alb-sg"
+  description = "Allow HTTP and HTTPS from anywhere - DEMO"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "Allow HTTP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Allow HTTPS"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    #description = "Allow HTTPS"
+    from_port   = 8001
+    to_port     = 8001
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "Fvrk-demo-alb-sg"
+    Env  = "demo"
+  }
+}
+
+# 2. LOAD BALANCER (DEMO)
+resource "aws_lb" "main_demo" {
+  name               = "Fvrk-demo-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb_sg_demo.id]
+  subnets            = slice(aws_subnet.public[*].id, 0, 3)
+  idle_timeout       = 300
+
+  tags = {
+    Name = "Fvrk-demo-alb"
+    Env  = "demo"
+  }
+}
+
+# 3. HTTP LISTENER (Redirect 80 -> 443)
+resource "aws_lb_listener" "http_demo" {
+  load_balancer_arn = aws_lb.main_demo.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+# 4. HTTPS LISTENER (Port 443)
+resource "aws_lb_listener" "https_demo" {
+  load_balancer_arn = aws_lb.main_demo.arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+
+  certificate_arn = "arn:aws:acm:ap-south-1:010438478476:certificate/027daaa8-4c47-41d3-ad8c-b7828d332752"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.main_demo["fvrk-demo-tg"].arn
   }
 }
 
@@ -198,10 +297,10 @@ resource "aws_lb_listener" "https_uat" {
 
 # 1. THE NETWORK LOAD BALANCER
 resource "aws_lb" "nlb_rabbit" {
-  name               = "Fvrk-dev-nlb-front-door"
-  internal           = false
-  load_balancer_type = "network"
-  subnets            = slice(aws_subnet.public[*].id, 0, 3) 
+  name                             = "Fvrk-dev-nlb-front-door"
+  internal                         = false
+  load_balancer_type               = "network"
+  subnets                          = slice(aws_subnet.public[*].id, 0, 3)
   enable_cross_zone_load_balancing = true
 
   tags = {
@@ -216,7 +315,7 @@ resource "aws_lb" "nlb_rabbit" {
 # 2. TCP TARGET GROUP
 resource "aws_lb_target_group" "rabbit_messaging" {
   name        = "k8s-rabbit-mq-messaging"
-  port        = 32525       # Your specific NodePort
+  port        = 32525 # Your specific NodePort
   protocol    = "TCP"
   vpc_id      = data.aws_eks_cluster.cluster.vpc_config[0].vpc_id
   target_type = "instance"
@@ -253,7 +352,7 @@ resource "aws_lb_target_group" "alb_bridge" {
   port        = 443
   protocol    = "TCP"
   vpc_id      = data.aws_eks_cluster.cluster.vpc_config[0].vpc_id
-  
+
   health_check {
     protocol = "HTTPS"
     path     = "/health" # Ensure your ALB has a default response or use a known healthy path
@@ -264,7 +363,7 @@ resource "aws_lb_target_group" "alb_bridge" {
 # 5. ATTACH EXISTING ALB TO NLB
 resource "aws_lb_target_group_attachment" "alb_attachment" {
   target_group_arn = aws_lb_target_group.alb_bridge.arn
-  target_id        = aws_lb.main.id  # References the ALB from your LOADBALANCER.TF
+  target_id        = aws_lb.main.id # References the ALB from your LOADBALANCER.TF
   port             = 443
 }
 

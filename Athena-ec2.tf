@@ -16,6 +16,7 @@ resource "aws_instance" "athena_sit" {
 
   tags = {
     Name = "Athena-sit"
+    ENV_Product = "DEV_Athena"
   }
 }
 
@@ -54,6 +55,7 @@ resource "aws_instance" "athena_uat" {
 
   tags = {
     Name = "Athena-uat"
+    ENV_Product = "UAT_Athena"
   }
 }
 

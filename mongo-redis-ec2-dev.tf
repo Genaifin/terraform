@@ -1,19 +1,19 @@
 # --- 1. Get latest Ubuntu 24.04 AMI ---
-data "aws_ami" "ubuntu-latest" {
-  provider    = aws.mumbai
-  most_recent = true
-  owners      = ["099720109477"] # Canonical (Official Ubuntu Owner ID)
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-24.04-amd64-server-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
+#data "aws_ami" "ubuntu-latest" {
+#  provider    = aws.mumbai
+#  most_recent = true
+#  owners      = ["099720109477"] # Canonical (Official Ubuntu Owner ID)
+#
+#  filter {
+#    name   = "name"
+#    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-24.04-amd64-server-*"]
+#  }
+#
+#  filter {
+#    name   = "virtualization-type"
+#    values = ["hvm"]
+#  }
+#}
 
 
 # --- 5. Security Group ---
@@ -84,6 +84,7 @@ resource "aws_instance" "mongo-redis-dev" {
   tags = {
     Name = "mongo-redis-dev"
     Env  = "Dev"
+    ENV_Component = "DEV_Redis"
   }
 }
 

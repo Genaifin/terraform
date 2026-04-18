@@ -28,5 +28,5 @@ resource "aws_instance" "airflow" {
 resource "aws_ec2_instance_state" "airflow_state" {
   provider    = aws.mumbai
   instance_id = aws_instance.airflow.id
-  state       = "running"
+  state       = "stopped"
 }

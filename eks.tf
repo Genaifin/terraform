@@ -39,12 +39,12 @@ resource "aws_eks_node_group" "main" {
   # -------------------------------------
 
   scaling_config {
-    desired_size = 6
-    max_size     = 8
+    desired_size = 7
+    max_size     = 12
     min_size     = 0
   }
 
-  instance_types = ["t3a.large"] 
+  instance_types = ["t3a.xlarge"] 
   capacity_type  = "ON_DEMAND"
 
   depends_on = [

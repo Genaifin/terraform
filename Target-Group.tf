@@ -40,6 +40,7 @@ locals {
     "etl-dev"                      = { k8s_service = "etl-deployment-dev", k8s_port = 5000, health_path = "/", namespace = "dev" }
     "grafana-k8s"                  = { k8s_service = "kube-prometheus-stack-grafana", k8s_port = 80, health_path = "/api/health", namespace = "monitoring" }
     "schedulerapi-dev"             = { k8s_service = "schedulerapi-service-dev", k8s_port = 5000, health_path = "/", namespace = "dev" }
+    "redisinsight-service"             = { k8s_service = "redisinsight-service", k8s_port = 5540, health_path = "/api/health", namespace = "dev" }
   }
 }
 
@@ -312,5 +313,17 @@ resource "aws_lb_listener_rule" "rule_19" {
   }
   condition {
     path_pattern { values = ["/api/etl/*"] }
+  }
+}
+
+resource "aws_lb_listener_rule" "rule_107" {
+  listener_arn = aws_lb_listener.https.arn
+  priority     = 107
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.main["redisinsight-service"].arn
+  }
+  condition {
+    host_header { values = ["redisinsight.aithondev.com"] }
   }
 }
