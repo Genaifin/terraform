@@ -39,7 +39,7 @@ resource "aws_eks_node_group" "main" {
   # -------------------------------------
 
   scaling_config {
-    desired_size = 7
+    desired_size = 8
     max_size     = 12
     min_size     = 0
   }
@@ -56,6 +56,8 @@ resource "aws_eks_node_group" "main" {
 
   tags = {
     Name = "Fvrk-dev-node"
+    "k8s.io/cluster-autoscaler/enabled"     = "true"
+    "k8s.io/cluster-autoscaler/FVKR-DEV" = "owned"
   }
 }
 
