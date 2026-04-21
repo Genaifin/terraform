@@ -15,7 +15,8 @@ locals {
     "schedulerapi",
     "harvestingapi",
     "etl",
-    "frame-athena"
+    "frame-athena",
+    "wire-api"
   ]
 }
 
