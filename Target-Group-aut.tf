@@ -11,19 +11,23 @@ locals {
     "text-extraction-uat"         = { node_port = 30032, k8s_service = "text-extraction-service-uat", k8s_port = 8015, health_path = "/api/framev3/document-text-extraction/health" }
     "validus-uat"                 = { node_port = 30031, k8s_service = "validus-service-uat", k8s_port = 8020, health_path = "/health" }
     "fvrk-uat-tg"                 = { node_port = 30034, k8s_service = "frame-validus-service-uat", k8s_port = 80, health_path = "/" }
-    "frame-uat"                   = { node_port = 30041, k8s_service = "frame-service-uat", k8s_port = 8040, health_path = "/health" }   
+    "frame-uat"                   = { node_port = 30041, k8s_service = "frame-service-uat", k8s_port = 8040, health_path = "/health" }
     "common-service-uat"          = { node_port = 30038, k8s_service = "common-service-service-uat", k8s_port = 8000, health_path = "/api/common/health" }
     "airflow-uat"                 = { node_port = 30061, k8s_service = "airflow-webserver-nodeport-uat", k8s_port = 8080, health_path = "/health" }
     "kong-gateway-uat"            = { node_port = 30107, k8s_service = "kong-service-uat", k8s_port = 8000, health_path = "/api/common/health" }
     "rabbitmq-uat"                = { node_port = 30039, k8s_service = "rabbitmq-service-uat", k8s_port = 15672, health_path = "/api/health/checks/virtual-hosts" }
-    
+
     # --- NEWLY ADDED UAT SERVICES ---
-    "keycloak-uat"                = { node_port = 30131, k8s_service = "keycloak-service-uat", k8s_port = 8080, health_path = "/health/live" }
-    "kong-uat-admin"              = { node_port = 30133, k8s_service = "kong-uat-admin-service", k8s_port = 8001, health_path = "/status" }
-    "konga-uat"                   = { node_port = 30134, k8s_service = "konga-service-uat", k8s_port = 1337, health_path = "/status" }
+    "keycloak-uat"   = { node_port = 30131, k8s_service = "keycloak-service-uat", k8s_port = 8080, health_path = "/health/live" }
+    "kong-uat-admin" = { node_port = 30133, k8s_service = "kong-uat-admin-service", k8s_port = 8001, health_path = "/status" }
+    "konga-uat"      = { node_port = 30134, k8s_service = "konga-service-uat", k8s_port = 1337, health_path = "/status" }
 
     # --- ETL UAT SERVICE ---
-    "etl-uat"                     = { node_port = 30042, k8s_service = "etl-deployment-uat", k8s_port = 5000, health_path = "/" }
+    "etl-uat" = { node_port = 30042, k8s_service = "etl-deployment-uat", k8s_port = 5000, health_path = "/" }
+
+
+    "schedulerapi-uat"   = { node_port = 30046, k8s_service = "schedulerapi-service-uat", k8s_port = 5000, health_path = "/" }
+    "harvesting-api-uat" = { node_port = 30043, k8s_service = "harvesting-api-service-uat", k8s_port = 8000, health_path = "/" }
   }
 }
 
@@ -258,6 +262,36 @@ resource "aws_lb_listener_rule" "uat_rule_13" {
   condition {
     host_header {
       values = ["etl-uat.aithondev.com"]
+    }
+  }
+}
+
+
+resource "aws_lb_listener_rule" "uat_rule_14" {
+  listener_arn = aws_lb_listener.https_uat.arn
+  priority     = 14
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.main_uat["schedulerapi-uat"].arn
+  }
+  condition {
+    path_pattern {
+      values = ["/api/scheduler/*"]
+    }
+  }
+}
+
+
+resource "aws_lb_listener_rule" "uat_rule_15" {
+  listener_arn = aws_lb_listener.https_uat.arn
+  priority     = 15
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.main_uat["harvesting-api-uat"].arn
+  }
+  condition {
+    host_header {
+      values = ["harvesting-api-uat.aithondev.com"]
     }
   }
 }
